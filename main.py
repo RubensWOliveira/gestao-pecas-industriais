@@ -12,21 +12,17 @@ CAPACIDADE_CAIXA = 10
 
 # --- FUNÇÃO: AVALIAR QUALIDADE DA PEÇA ---
 def avaliar_peca(peso, cor, comprimento):
-    motivos = []  # Lista que vai guardar os motivos de reprovação
+    motivos = []
 
-    # Verifica o peso
     if peso < 95 or peso > 105:
         motivos.append(f"Peso fora do padrão ({peso}g)")
 
-    # Verifica a cor
     if cor.lower() not in ["azul", "verde"]:
         motivos.append(f"Cor inválida ({cor})")
 
-    # Verifica o comprimento
     if comprimento < 10 or comprimento > 20:
         motivos.append(f"Comprimento fora do padrão ({comprimento}cm)")
 
-    # Se não há motivos de reprovação, a peça foi aprovada
     if len(motivos) == 0:
         return "aprovada", []
     else:
@@ -39,10 +35,8 @@ def cadastrar_peca():
     print("        CADASTRO DE NOVA PEÇA")
     print("-"*45)
 
-    # Coleta os dados da peça
     id_peca = input("  ID da peça: ").strip()
 
-    # Garante que peso e comprimento sejam números
     try:
         peso = float(input("  Peso (g): "))
         comprimento = float(input("  Comprimento (cm): "))
@@ -52,10 +46,8 @@ def cadastrar_peca():
 
     cor = input("  Cor: ").strip()
 
-    # Avalia a peça
     status, motivos = avaliar_peca(peso, cor, comprimento)
 
-    # Monta o dicionário com os dados da peça
     peca = {
         "id": id_peca,
         "peso": peso,
@@ -65,24 +57,85 @@ def cadastrar_peca():
         "motivos": motivos
     }
 
-    # Adiciona na lista geral de peças
     pecas.append(peca)
 
-    # Se aprovada, adiciona na caixa atual
     if status == "aprovada":
         caixa_atual.append(peca)
         print(f"\n  ✅ Peça {id_peca} APROVADA!")
         print(f"  📦 Posição na caixa atual: {len(caixa_atual)}/{CAPACIDADE_CAIXA}")
 
-        # Verifica se a caixa encheu
         if len(caixa_atual) == CAPACIDADE_CAIXA:
-            caixas.append(list(caixa_atual))  # Fecha a caixa
-            caixa_atual.clear()               # Abre uma nova caixa vazia
+            caixas.append(list(caixa_atual))
+            caixa_atual.clear()
             print(f"\n  📦 Caixa {len(caixas)} fechada! Nova caixa iniciada.")
     else:
         print(f"\n  ❌ Peça {id_peca} REPROVADA!")
         for motivo in motivos:
             print(f"     → {motivo}")
+
+
+# --- FUNÇÃO: LISTAR PEÇAS ---
+def listar_pecas():
+    print("\n" + "-"*45)
+    print("         LISTA DE PEÇAS CADASTRADAS")
+    print("-"*45)
+
+    # Verifica se há peças cadastradas
+    if len(pecas) == 0:
+        print("  Nenhuma peça cadastrada ainda.")
+        return
+
+    aprovadas = [p for p in pecas if p["status"] == "aprovada"]
+    reprovadas = [p for p in pecas if p["status"] == "reprovada"]
+
+    # Mostra peças aprovadas
+    print(f"\n  ✅ APROVADAS ({len(aprovadas)}):")
+    if len(aprovadas) == 0:
+        print("     Nenhuma peça aprovada.")
+    else:
+        for p in aprovadas:
+            print(f"     → ID: {p['id']} | Peso: {p['peso']}g | Cor: {p['cor']} | Comprimento: {p['comprimento']}cm")
+
+    # Mostra peças reprovadas
+    print(f"\n  ❌ REPROVADAS ({len(reprovadas)}):")
+    if len(reprovadas) == 0:
+        print("     Nenhuma peça reprovada.")
+    else:
+        for p in reprovadas:
+            print(f"     → ID: {p['id']} | Motivo(s): {', '.join(p['motivos'])}")
+
+
+# --- FUNÇÃO: REMOVER PEÇA ---
+def remover_peca():
+    print("\n" + "-"*45)
+    print("         REMOVER PEÇA CADASTRADA")
+    print("-"*45)
+
+    if len(pecas) == 0:
+        print("  Nenhuma peça cadastrada para remover.")
+        return
+
+    id_remover = input("  Digite o ID da peça a remover: ").strip()
+
+    # Procura a peça na lista
+    peca_encontrada = None
+    for p in pecas:
+        if p["id"] == id_remover:
+            peca_encontrada = p
+            break
+
+    if peca_encontrada is None:
+        print(f"\n  ⚠️  Peça com ID '{id_remover}' não encontrada.")
+        return
+
+    # Remove da lista de peças
+    pecas.remove(peca_encontrada)
+
+    # Se era aprovada, remove da caixa atual também
+    if peca_encontrada in caixa_atual:
+        caixa_atual.remove(peca_encontrada)
+
+    print(f"\n  🗑️  Peça {id_remover} removida com sucesso!")
 
 
 # --- FUNÇÃO DO MENU ---
@@ -108,9 +161,9 @@ def main():
         if opcao == "1":
             cadastrar_peca()
         elif opcao == "2":
-            print("\n[Em breve] Listar peças...")
+            listar_pecas()
         elif opcao == "3":
-            print("\n[Em breve] Remover peça...")
+            remover_peca()
         elif opcao == "4":
             print("\n[Em breve] Listar caixas...")
         elif opcao == "5":

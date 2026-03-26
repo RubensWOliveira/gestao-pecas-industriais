@@ -80,7 +80,6 @@ def listar_pecas():
     print("         LISTA DE PEÇAS CADASTRADAS")
     print("-"*45)
 
-    # Verifica se há peças cadastradas
     if len(pecas) == 0:
         print("  Nenhuma peça cadastrada ainda.")
         return
@@ -88,7 +87,6 @@ def listar_pecas():
     aprovadas = [p for p in pecas if p["status"] == "aprovada"]
     reprovadas = [p for p in pecas if p["status"] == "reprovada"]
 
-    # Mostra peças aprovadas
     print(f"\n  ✅ APROVADAS ({len(aprovadas)}):")
     if len(aprovadas) == 0:
         print("     Nenhuma peça aprovada.")
@@ -96,7 +94,6 @@ def listar_pecas():
         for p in aprovadas:
             print(f"     → ID: {p['id']} | Peso: {p['peso']}g | Cor: {p['cor']} | Comprimento: {p['comprimento']}cm")
 
-    # Mostra peças reprovadas
     print(f"\n  ❌ REPROVADAS ({len(reprovadas)}):")
     if len(reprovadas) == 0:
         print("     Nenhuma peça reprovada.")
@@ -117,7 +114,6 @@ def remover_peca():
 
     id_remover = input("  Digite o ID da peça a remover: ").strip()
 
-    # Procura a peça na lista
     peca_encontrada = None
     for p in pecas:
         if p["id"] == id_remover:
@@ -128,14 +124,67 @@ def remover_peca():
         print(f"\n  ⚠️  Peça com ID '{id_remover}' não encontrada.")
         return
 
-    # Remove da lista de peças
     pecas.remove(peca_encontrada)
 
-    # Se era aprovada, remove da caixa atual também
     if peca_encontrada in caixa_atual:
         caixa_atual.remove(peca_encontrada)
 
     print(f"\n  🗑️  Peça {id_remover} removida com sucesso!")
+
+
+# --- FUNÇÃO: LISTAR CAIXAS FECHADAS ---
+def listar_caixas():
+    print("\n" + "-"*45)
+    print("           CAIXAS FECHADAS")
+    print("-"*45)
+
+    if len(caixas) == 0:
+        print("  Nenhuma caixa fechada ainda.")
+        print("  💡 Dica: cadastre 10 peças aprovadas para fechar uma caixa!")
+        return
+
+    for i, caixa in enumerate(caixas):
+        print(f"\n  📦 CAIXA {i+1} — {len(caixa)} peças:")
+        for peca in caixa:
+            print(f"     → ID: {peca['id']} | Peso: {peca['peso']}g | Cor: {peca['cor']} | Comprimento: {peca['comprimento']}cm")
+
+    # Mostra também a caixa atual se tiver peças
+    if len(caixa_atual) > 0:
+        print(f"\n  📂 CAIXA ATUAL (aberta) — {len(caixa_atual)}/{CAPACIDADE_CAIXA} peças:")
+        for peca in caixa_atual:
+            print(f"     → ID: {peca['id']} | Peso: {peca['peso']}g | Cor: {peca['cor']} | Comprimento: {peca['comprimento']}cm")
+
+
+# --- FUNÇÃO: RELATÓRIO FINAL ---
+def gerar_relatorio():
+    print("\n" + "="*45)
+    print("            RELATÓRIO FINAL")
+    print("="*45)
+
+    total = len(pecas)
+    aprovadas = [p for p in pecas if p["status"] == "aprovada"]
+    reprovadas = [p for p in pecas if p["status"] == "reprovada"]
+    total_caixas = len(caixas)
+
+    # Se tiver peças na caixa atual, conta como mais uma caixa em uso
+    if len(caixa_atual) > 0:
+        total_caixas += 1
+
+    print(f"\n  📊 Total de peças cadastradas : {total}")
+    print(f"  ✅ Total de peças aprovadas   : {len(aprovadas)}")
+    print(f"  ❌ Total de peças reprovadas  : {len(reprovadas)}")
+    print(f"  📦 Total de caixas utilizadas : {total_caixas}")
+
+    if len(reprovadas) > 0:
+        print(f"\n  ❌ DETALHES DAS REPROVAÇÕES:")
+        for p in reprovadas:
+            print(f"     → ID: {p['id']} | Motivo(s): {', '.join(p['motivos'])}")
+
+    if total > 0:
+        taxa = (len(aprovadas) / total) * 100
+        print(f"\n  📈 Taxa de aprovação: {taxa:.1f}%")
+
+    print("\n" + "="*45)
 
 
 # --- FUNÇÃO DO MENU ---
@@ -165,9 +214,9 @@ def main():
         elif opcao == "3":
             remover_peca()
         elif opcao == "4":
-            print("\n[Em breve] Listar caixas...")
+            listar_caixas()
         elif opcao == "5":
-            print("\n[Em breve] Relatório final...")
+            gerar_relatorio()
         elif opcao == "0":
             print("\n  Encerrando o sistema. Até logo! 👋\n")
             break

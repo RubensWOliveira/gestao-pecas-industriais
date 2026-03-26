@@ -4,17 +4,85 @@
 # ============================================================
 
 # --- ESTRUTURAS DE DADOS ---
-# Lista que guarda todas as peças cadastradas
 pecas = []
-
-# Lista que guarda as caixas fechadas
 caixas = []
-
-# Caixa atual que está sendo preenchida
 caixa_atual = []
-
-# Capacidade máxima de peças por caixa
 CAPACIDADE_CAIXA = 10
+
+
+# --- FUNÇÃO: AVALIAR QUALIDADE DA PEÇA ---
+def avaliar_peca(peso, cor, comprimento):
+    motivos = []  # Lista que vai guardar os motivos de reprovação
+
+    # Verifica o peso
+    if peso < 95 or peso > 105:
+        motivos.append(f"Peso fora do padrão ({peso}g)")
+
+    # Verifica a cor
+    if cor.lower() not in ["azul", "verde"]:
+        motivos.append(f"Cor inválida ({cor})")
+
+    # Verifica o comprimento
+    if comprimento < 10 or comprimento > 20:
+        motivos.append(f"Comprimento fora do padrão ({comprimento}cm)")
+
+    # Se não há motivos de reprovação, a peça foi aprovada
+    if len(motivos) == 0:
+        return "aprovada", []
+    else:
+        return "reprovada", motivos
+
+
+# --- FUNÇÃO: CADASTRAR NOVA PEÇA ---
+def cadastrar_peca():
+    print("\n" + "-"*45)
+    print("        CADASTRO DE NOVA PEÇA")
+    print("-"*45)
+
+    # Coleta os dados da peça
+    id_peca = input("  ID da peça: ").strip()
+
+    # Garante que peso e comprimento sejam números
+    try:
+        peso = float(input("  Peso (g): "))
+        comprimento = float(input("  Comprimento (cm): "))
+    except ValueError:
+        print("\n  ⚠️  Peso e comprimento devem ser números!")
+        return
+
+    cor = input("  Cor: ").strip()
+
+    # Avalia a peça
+    status, motivos = avaliar_peca(peso, cor, comprimento)
+
+    # Monta o dicionário com os dados da peça
+    peca = {
+        "id": id_peca,
+        "peso": peso,
+        "cor": cor,
+        "comprimento": comprimento,
+        "status": status,
+        "motivos": motivos
+    }
+
+    # Adiciona na lista geral de peças
+    pecas.append(peca)
+
+    # Se aprovada, adiciona na caixa atual
+    if status == "aprovada":
+        caixa_atual.append(peca)
+        print(f"\n  ✅ Peça {id_peca} APROVADA!")
+        print(f"  📦 Posição na caixa atual: {len(caixa_atual)}/{CAPACIDADE_CAIXA}")
+
+        # Verifica se a caixa encheu
+        if len(caixa_atual) == CAPACIDADE_CAIXA:
+            caixas.append(list(caixa_atual))  # Fecha a caixa
+            caixa_atual.clear()               # Abre uma nova caixa vazia
+            print(f"\n  📦 Caixa {len(caixas)} fechada! Nova caixa iniciada.")
+    else:
+        print(f"\n  ❌ Peça {id_peca} REPROVADA!")
+        for motivo in motivos:
+            print(f"     → {motivo}")
 
 
 # --- FUNÇÃO DO MENU ---
@@ -38,7 +106,7 @@ def main():
         opcao = input("  Escolha uma opção: ").strip()
 
         if opcao == "1":
-            print("\n[Em breve] Cadastrar peça...")
+            cadastrar_peca()
         elif opcao == "2":
             print("\n[Em breve] Listar peças...")
         elif opcao == "3":
